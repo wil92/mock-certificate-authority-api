@@ -13,10 +13,4 @@ app.use(cookieParser());
 
 app.use('*', certRouter);
 
-// error handler
-app.use(function(err, req, res) {
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-});
-
 module.exports = app;
