@@ -8,10 +8,15 @@ const unlink = util.promisify(fs.unlink);
 
 const NEW_CERT_NAME = 'server-cert.pem';
 const NEW_CERT_NAME_P7 = 'server-cert.p7b';
-const SERVER_PK = 'server-key.pem';
+const SERVER_PK = process.env.SERVER_PK ? process.env.SERVER_PK : 'server-key.pem';
+const SERVER_CERT = process.env.SERVER_CERT ? process.env.SERVER_CERT : null;
 
 module.exports = async function generateTLSCert(csr) {
-    await exec(`openssl x509 -req -in ${csr} -signkey ${SERVER_PK} -out ${NEW_CERT_NAME}`);
+    if (SERVER_CERT) {
+        await exec(`openssl x509 -req -days 1500 -in ${csr} -CA ${SERVER_CERT} -CAkey ${SERVER_PK} -CAcreateserial -out ${NEW_CERT_NAME} -sha256`)
+    } else {
+        await exec(`openssl x509 -req -in ${csr} -signkey ${SERVER_PK} -out ${NEW_CERT_NAME}`);
+    }
 
     await exec(`openssl crl2pkcs7 -nocrl -certfile ${NEW_CERT_NAME} -out ${NEW_CERT_NAME_P7}`);
 
