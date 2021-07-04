@@ -9,7 +9,7 @@ An easy solution for simulate a certificate authority API.
 npm install
 
 # start project
-npm start
+DEBUG='*' npm start
 ```
 
 ## Dependencies
