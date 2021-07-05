@@ -6,23 +6,30 @@ const removeCert = require('../utils/remove-cert');
 const router = express.Router();
 const CSR_CERT = 'server-csr';
 
-/* POST CSMS mock data */
-router.post('/', (req, res, next) => {
+async function processReq(req, res) {
     const {requestId, plainCsr, signature, signerCertChain} = req.body;
 
     const crsCertName = `${CSR_CERT}_${new Date().getTime()}.pem`;
 
-    saveCert(crsCertName, plainCsr)
-        .then(() => generateTLSCert(crsCertName))
-        .then(newKey => {
-            const buff = new Buffer(newKey);
-            res.json({
-                requestId,
-                certificates: buff.toString('base64')
-            });
-        })
-        .then(() => removeCert(crsCertName))
-        .then(() => next());
+    await saveCert(crsCertName, plainCsr);
+    let newKey = await generateTLSCert(crsCertName);
+    newKey = newKey.replace(/(\r\n|\n|\r)/gm, "");
+    newKey = newKey.substr("-----BEGIN PKCS7-----".length);
+    newKey = newKey.substr(0, newKey.indexOf("-----END PKCS7-----"));
+    res.json({
+        requestId,
+        certificates: newKey
+    });
+    removeCert(crsCertName);
+}
+
+/* POST CSMS mock data */
+router.post('/pnc/cpoca/porsche-cpo/certificate/v1/ocpp-client/plain', async (req, res) => {
+    await processReq(req, res);
+});
+
+router.post('/pnc/cpoca/porsche-cpo/certificate/v1/secc-leaf/plain', async (req, res) => {
+    await processReq(req, res);
 });
 
 module.exports = router;

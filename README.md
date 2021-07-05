@@ -9,7 +9,7 @@ An easy solution for simulate a certificate authority API.
 npm install
 
 # start project
-npm start
+DEBUG='*' SERVER_PK=<path-to-ca-key-here> SERVER_CERT=<path-to-ca-cert-here> npm start
 ```
 
 ## Dependencies
