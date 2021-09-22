@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const generateTLSCert = require('../utils/sign-cert');
 const saveCert = require('../utils/save-cert');
@@ -30,6 +31,12 @@ router.post('/pnc/cpoca/porsche-cpo/certificate/v1/ocpp-client/plain', async (re
 
 router.post('/pnc/cpoca/porsche-cpo/certificate/v1/secc-leaf/plain', async (req, res) => {
     await processReq(req, res);
+});
+
+router.post('/ocsp', async (req, res) => {
+    const pathToFile = path.join(__dirname, '../test-cert.crt');
+    console.log(pathToFile);
+    res.sendFile(pathToFile);
 });
 
 module.exports = router;
